@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.TriviaQuiz" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/prussian_blue</item>
+        <item name="colorPrimaryVariant">@color/prussian_blue_2</item>
+        <item name="colorOnPrimary">@color/beige</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/gunmetal</item>
+        <item name="colorSecondaryVariant">@color/gunmetal_2</item>
+        <item name="colorOnSecondary">@color/pastel_pink</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+    <style name="stroke1" parent="">
+
+    </style>
+</resources>

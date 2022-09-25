@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Trivia Quiz</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Name">Name</string>
+    <string name="True">True</string>
+    <string name="False">False</string>
+    <string name="Submit">Submit</string>
+    <string name="Next">Next</string>
+    <string name="congrats_127881">Congrats! 🎉</string>
+    <string name="score">Score</string>
+</resources>
