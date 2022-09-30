@@ -1,6 +1,5 @@
 package com.example.triviaquiz.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -24,5 +23,9 @@ interface PlayerDao {
 
     @Query("Select * From player_table where username = :name")
     fun getByName(name: String):Flow<Player>
+
+//    @Query("Select * From player_table where  high_score = (select  max(high_score) where high_level = (select max(high_level) from player_table))")
+    @Query("Select * from player_table order By high_level DEsc, high_score Desc limit 1")
+    fun getHighScorePlayer():Flow<Player>
 
 }

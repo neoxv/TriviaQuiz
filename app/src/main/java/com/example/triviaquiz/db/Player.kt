@@ -11,8 +11,6 @@ data class Player(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "_id")
     var id:Int? = null,
-    @ColumnInfo(name = "score")
-    var score:Int = 0,
     @ColumnInfo(name = "high_score")
     var highScore:Int = 0,
     @ColumnInfo(name = "high_level")

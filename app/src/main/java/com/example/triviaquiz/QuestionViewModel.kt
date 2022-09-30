@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class QuestionViewModel(private val dao: QuestionDao): ViewModel() {
-    fun getQuestions(): Flow<List<Question>> = dao.getQuestionByPlayer()
+    fun getQuestions(): Flow<MutableList<Question>> = dao.getQuestionByPlayer()
 
     fun insertQuestion(question: Question)=viewModelScope.launch {
         dao.insertQuestion(question)

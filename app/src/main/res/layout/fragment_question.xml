@@ -47,6 +47,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="right"
+                android:padding="5dp"
+                android:paddingEnd="10dp"
                 android:text="Level : 1"
                 android:textSize="18sp" />
 
@@ -120,10 +122,10 @@
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="7dp"
                     android:layout_weight="1"
-                    android:max="10"
+                    android:max="5"
                     android:minHeight="50dp"
                     android:paddingTop="10dp"
-                    android:progress="5"
+                    android:progress="0"
                     app:indicatorColor="@color/beige"
                     app:trackColor="@color/prussian_blue"
                     app:trackCornerRadius="10dp" />

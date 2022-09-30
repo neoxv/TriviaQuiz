@@ -9,12 +9,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.triviaquiz.databinding.FragmentHomeBinding
 import com.example.triviaquiz.db.Player
 import com.example.triviaquiz.db.Question
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import retrofit2.Callback
 
 
 class HomeFragment : Fragment() {
@@ -36,12 +41,46 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater,container,false)
+
+        lifecycle.coroutineScope.launch {
+            playerViewModel.getPlayers().collect(){
+                it.forEach { player->
+                    var playerChip = createChip(player.username)
+                    binding.cgPlayerChips.addView(playerChip)
+                }
+            }
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loaderView = CircularProgressIndicator(requireContext())
+        binding.cgPlayerChips.setOnCheckedStateChangeListener{ group, checkedIds ->
+            loaderView.isIndeterminate = true
+            binding.llHome.addView(loaderView)
+
+            (activity as MainActivity).initiateQuiz(5,QuestionDifficulty.EASY,object: QuestionCall {
+                override fun onSuccess(questionList: MutableList<Question>) {
+                    questionViewModel.clearQuestions()
+                    questionList.forEach { q ->
+                        questionViewModel.insertQuestion(q)
+                    }
+                    (activity as MainActivity).sfEdit.apply{
+                        remove("username")
+                        putString("username",binding.etName.text.toString())
+                        commit()
+                    }
+                    view.findNavController().navigate(R.id.action_homeFragment_to_questionFragment)
+                }
+
+                override fun onError(error: String) {
+                    binding.llHome.removeView(loaderView)
+                    Toast.makeText(activity,"Failed to fetch questions.", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
 
         binding.btnSubmit.setOnClickListener { homeView ->
             if (!TextUtils.isEmpty(binding.etName.text.toString())){
@@ -58,7 +97,9 @@ class HomeFragment : Fragment() {
                             questionViewModel.insertQuestion(q)
                         }
                         (activity as MainActivity).sfEdit.apply{
-                            putString("username",binding.etName.toString())
+                            remove("username")
+                            putString("username",binding.etName.text.toString())
+                            commit()
                         }
                         homeView.findNavController().navigate(R.id.action_homeFragment_to_questionFragment)
                     }
@@ -74,4 +115,15 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun createChip(label:String): Chip {
+        return Chip(context).apply {
+            id = View.generateViewId()
+            text = label
+            isClickable = true
+            isCheckedIconVisible = false
+            isFocusable = true
+            isCheckable = true
+        }
+
+    }
 }

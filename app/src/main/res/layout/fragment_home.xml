@@ -79,6 +79,16 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/cgPlayerChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="16dp"
+                    app:singleSelection="true"
+                    >
+
+                </com.google.android.material.chip.ChipGroup>
+
                 <Button
                     android:id="@+id/btnSubmit"
                     android:layout_width="match_parent"
@@ -87,6 +97,7 @@
                     android:backgroundTint="@color/pastel_pink"
                     android:text="Start"
                     android:textColor="@color/prussian_blue"/>
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>

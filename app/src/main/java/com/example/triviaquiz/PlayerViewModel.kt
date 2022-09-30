@@ -16,10 +16,9 @@ class PlayerViewModel(private val dao: PlayerDao): ViewModel() {
         dao.updatePlayer(player)
     }
 
-    fun getPlayers()=viewModelScope.launch {
-        dao.getAllPlayers()
-    }
+    fun getPlayers(): Flow<List<Player>> = dao.getAllPlayers()
 
     fun getPlayerByName(name:String): Flow<Player> =  dao.getByName(name)
 
+    fun getHighScorePlayer(): Flow<Player> = dao.getHighScorePlayer()
 }

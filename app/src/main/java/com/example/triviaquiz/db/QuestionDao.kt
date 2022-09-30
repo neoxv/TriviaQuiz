@@ -1,6 +1,5 @@
 package com.example.triviaquiz.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -10,7 +9,7 @@ interface QuestionDao {
     suspend fun insertQuestion(question:Question)
 
     @Query("SELECT * FROM question_table")
-    fun getQuestionByPlayer(): Flow<List<Question>>
+    fun getQuestionByPlayer(): Flow<MutableList<Question>>
 
     @Query("DELETE FROM question_table")
     suspend fun clearQuestions()
