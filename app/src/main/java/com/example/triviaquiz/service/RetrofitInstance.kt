@@ -1,15 +1,14 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.service
 
-import com.google.gson.GsonBuilder
+import com.example.triviaquiz.BuildConfig.BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 class RetrofitInstance {
-    companion object{
-        private const val BASE_URL = "https://opentdb.com/"
+    companion object {
         private val interceptor = HttpLoggingInterceptor().apply {
             this.level = HttpLoggingInterceptor.Level.BODY
         }
@@ -22,11 +21,8 @@ class RetrofitInstance {
         }.build()
 
         fun getRetrofitInstance(): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-                .build()
+            return Retrofit.Builder().baseUrl(BASE_URL).client(client)
+                .addConverterFactory(MoshiConverterFactory.create()).build()
         }
     }
 }

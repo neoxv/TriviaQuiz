@@ -1,16 +1,17 @@
-package com.example.triviaquiz.db
+package com.example.triviaquiz.room.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.triviaquiz.room.entity.Player
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlayerDao {
     @Insert
-    suspend fun insertPlayer(player:Player)
+    suspend fun insertPlayer(player: Player)
 
     @Query("SELECT * FROM player_table")
     fun getAllPlayers(): Flow<List<Player>>
@@ -19,7 +20,7 @@ interface PlayerDao {
     suspend fun updatePlayer(player: Player)
 
     @Delete
-    suspend fun deletePlayer(player:Player)
+    suspend fun deletePlayer(player: Player)
 
     @Query("Select * From player_table where username = :name")
     fun getByName(name: String):Flow<Player>

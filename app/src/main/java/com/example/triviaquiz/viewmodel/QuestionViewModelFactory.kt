@@ -1,9 +1,8 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.triviaquiz.db.QuestionDao
+import com.example.triviaquiz.room.dao.QuestionDao
 
 class QuestionViewModelFactory(private val dao: QuestionDao): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

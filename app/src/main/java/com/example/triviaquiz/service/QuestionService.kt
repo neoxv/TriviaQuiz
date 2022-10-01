@@ -1,6 +1,6 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.service
 
-import com.example.triviaquiz.db.Questions
+import com.example.triviaquiz.model.Questions
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

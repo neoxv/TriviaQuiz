@@ -1,10 +1,9 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.triviaquiz.db.Question
-import com.example.triviaquiz.db.QuestionDao
-import com.example.triviaquiz.db.Questions
+import com.example.triviaquiz.model.Question
+import com.example.triviaquiz.room.dao.QuestionDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
