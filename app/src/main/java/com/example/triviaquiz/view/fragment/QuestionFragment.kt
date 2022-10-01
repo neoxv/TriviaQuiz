@@ -21,17 +21,22 @@ import com.example.triviaquiz.*
 import com.example.triviaquiz.databinding.FragmentQuestionBinding
 import com.example.triviaquiz.event.QuestionCall
 import com.example.triviaquiz.model.Question
-import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.util.Constant.QUESTION_COUNT
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_ANY
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_EASY
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_HARD
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_MEDIUM
 import com.example.triviaquiz.view.MainActivity
 import com.example.triviaquiz.viewmodel.PlayerViewModel
 import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
 import com.example.triviaquiz.viewmodel.QuestionViewModel
 import com.example.triviaquiz.viewmodel.QuestionViewModelFactory
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-class QuestionFragment : Fragment(),View.OnClickListener {
+class QuestionFragment : Fragment(), View.OnClickListener {
     private lateinit var binding: FragmentQuestionBinding
     private var questionList = mutableListOf<Question>()
     private var currentQuestion = 1
@@ -40,7 +45,7 @@ class QuestionFragment : Fragment(),View.OnClickListener {
     private var lifeLoss = 0
     private var level = 1
     private var username = ""
-    private var currentDifficulty = QuestionDifficulty.EASY
+    private var currentDifficulty = QUESTION_DIFFICULTY_EASY
     private var gameStatus = true
     private val questionViewModel: QuestionViewModel by activityViewModels {
         QuestionViewModelFactory((activity?.application as TriviaQuizApplication).database.questionDao())
@@ -57,19 +62,19 @@ class QuestionFragment : Fragment(),View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentQuestionBinding.inflate(inflater,container,false)
+        binding = FragmentQuestionBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
-            questionViewModel.getQuestions().collect(){
+            questionViewModel.getQuestions().collect() {
                 questionList = it
                 binding.progressBar.progress = currentQuestion
-                binding.tvQuestionCount.text = "$currentQuestion/5"
-                Log.i("t","${questionList.size.toString()}")
-                if(it.size > 0){
+                binding.tvQuestionCount.text = "$currentQuestion/$QUESTION_COUNT"
+                Log.i("t", "${questionList.size.toString()}")
+                if (it.size > 0) {
                     drawQuestion(it[0])
                 }
             }
@@ -81,77 +86,97 @@ class QuestionFragment : Fragment(),View.OnClickListener {
             btnAnswerFour.setOnClickListener(this@QuestionFragment)
 
             btnNext.setOnClickListener { questionView ->
-                if (!gameStatus){
+                if (!gameStatus) {
                     var highScore = false
                     lifecycle.coroutineScope.launch {
-                        playerViewModel.getPlayerByName((activity as MainActivity).sf.getString("username","").toString()).collect(){ player ->
-                            if(player != null){
-                            Log.i("t","player is not null")
-                                if (player.highLevel < level){
-                                    Log.i("t","player high level")
+                        playerViewModel.getPlayerByName((activity as MainActivity).pref.username)
+                            .collectLatest { player ->
+                                if (player != null) {
+                                    Log.i("t", "player is not null")
+                                    if (player.highLevel < level) {
+                                        Log.i("t", "player high level")
 
-                                    player.highLevel = level
-                                    player.highScore = score
-                                    highScore = true
-                                }else if(player.highLevel == level && player.highScore < score){
-                                    Log.i("t","player high score" +
-                                            "")
-                                    player.highScore = score
-                                    highScore = true
+                                        player.highLevel = level
+                                        player.highScore = score
+                                        highScore = true
+                                    } else if (player.highLevel == level && player.highScore < score) {
+                                        Log.i(
+                                            "t", "player high score" +
+                                                    ""
+                                        )
+                                        player.highScore = score
+                                        highScore = true
+                                    }
+                                    playerViewModel.updatePlayer(player)
+                                } else {
+                                    val user = (activity as MainActivity).pref.username
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to fetch $user",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                                playerViewModel.updatePlayer(player)
-                            }else{
-                                var user = (activity as MainActivity).sf.getString("username","").toString()
-                                Toast.makeText(context,"Failed to fetch $user",Toast.LENGTH_SHORT).show()
                             }
-                        }
                     }
-                    var bundle = bundleOf("score" to score, "level" to level, "highScore" to highScore)
-                    questionView.findNavController().navigate(R.id.action_questionFragment_to_scoreFragment,bundle)
-                }else if (questionList.size > 0 && answerStatus && currentQuestion < questionList.size) {
+                    var bundle =
+                        bundleOf("score" to score, "level" to level, "highScore" to highScore)
+                    questionView.findNavController()
+                        .navigate(R.id.action_questionFragment_to_scoreFragment, bundle)
+                } else if (questionList.size > 0 && answerStatus && currentQuestion < questionList.size) {
                     clearQuestion()
                     answerStatus = false
                     currentQuestion += 1
                     binding.progressBar.progress = currentQuestion
-                    binding.tvQuestionCount.text = "$currentQuestion/5"
-                    var index = currentQuestion -1
+                    binding.tvQuestionCount.text = "$currentQuestion/$QUESTION_COUNT"
+                    var index = currentQuestion - 1
 
                     drawQuestion(questionList[index])
 
-                }else if (questionList.size > 0 && answerStatus && currentQuestion == questionList.size) {
-                    currentDifficulty = when(currentDifficulty){
-                        QuestionDifficulty.EASY -> QuestionDifficulty.MEDIUM
-                        QuestionDifficulty.MEDIUM -> QuestionDifficulty.HARD
-                        QuestionDifficulty.HARD -> QuestionDifficulty.ANY
+                } else if (questionList.size > 0 && answerStatus && currentQuestion == questionList.size) {
+                    currentDifficulty = when (currentDifficulty) {
+                        QUESTION_DIFFICULTY_EASY -> QUESTION_DIFFICULTY_MEDIUM
+                        QUESTION_DIFFICULTY_MEDIUM -> QUESTION_DIFFICULTY_HARD
+                        QUESTION_DIFFICULTY_HARD -> QUESTION_DIFFICULTY_ANY
                         else -> {
-                            QuestionDifficulty.EASY
+                            QUESTION_DIFFICULTY_EASY
                         }
                     }
-                    (activity as MainActivity).initiateQuiz(5, currentDifficulty,object:
-                        QuestionCall {
-                        override fun onSuccess(newQuestionList: MutableList<Question>) {
-                            questionViewModel.clearQuestions()
-                            questionList = newQuestionList
-                            questionList.forEach { q ->
-                                questionViewModel.insertQuestion(q)
+                    (activity as MainActivity).initiateQuiz(
+                        QUESTION_COUNT,
+                        currentDifficulty,
+                        object :
+                            QuestionCall {
+                            override fun onSuccess(newQuestionList: MutableList<Question>) {
+                                questionViewModel.clearQuestions()
+                                questionList = newQuestionList
+                                questionList.forEach { q ->
+                                    questionViewModel.insertQuestion(q)
+                                }
+                                clearQuestion()
+                                answerStatus = false
+                                level += 1
+                                currentQuestion = 1
+                                binding.tvLevel.text = "Level: $level"
+                                binding.progressBar.progress = currentQuestion
+                                binding.tvQuestionCount.text = "$currentQuestion/$QUESTION_COUNT"
+                                drawQuestion(questionList[0])
                             }
-                            clearQuestion()
-                            answerStatus = false
-                            level += 1
-                            currentQuestion = 1
-                            binding.tvLevel.text = "Level: $level"
-                            binding.progressBar.progress = currentQuestion
-                            binding.tvQuestionCount.text = "$currentQuestion/5"
-                            drawQuestion(questionList[0])
-                        }
 
-                        override fun onError(error: String) {
-                            Toast.makeText(activity,"Failed to fetch questions.", Toast.LENGTH_SHORT).show()
-                        }
-                    })
+                            override fun onError(error: String) {
+                                Toast.makeText(
+                                    activity,
+                                    "Failed to fetch questions.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
 
-                }else {
-                    Toast.makeText(activity, "${(activity as MainActivity).sf.getString("username","")}choose an answer.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(
+                        activity,
+                        "${(activity as MainActivity).pref.username} choose an answer.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -159,7 +184,7 @@ class QuestionFragment : Fragment(),View.OnClickListener {
 
     }
 
-    private fun drawQuestion(question: Question){
+    private fun drawQuestion(question: Question) {
         binding.apply {
             val questionText = question.question.parseAsHtml()
             if (currentQuestion == 1 && !answerStatus)
@@ -169,12 +194,12 @@ class QuestionFragment : Fragment(),View.OnClickListener {
             cpCategory.text = question.category
             cpDifficulty.text = question.difficulty
 
-            var answers:MutableList<String> = emptyList<String>().toMutableList()
+            var answers: MutableList<String> = emptyList<String>().toMutableList()
             answers.add(question.correct_answer)
             answers.addAll(question.incorrect_answers)
             answers = answers.shuffled() as MutableList<String>
 
-            if(question.type == "boolean") {
+            if (question.type == "boolean") {
                 btnAnswerOne.visibility = View.VISIBLE
                 btnAnswerTwo.visibility = View.VISIBLE
                 btnAnswerThree.visibility = View.GONE
@@ -182,7 +207,7 @@ class QuestionFragment : Fragment(),View.OnClickListener {
 
                 btnAnswerOne.text = answers[0]
                 btnAnswerTwo.text = answers[1]
-            }else {
+            } else {
                 btnAnswerOne.visibility = View.VISIBLE
                 btnAnswerTwo.visibility = View.VISIBLE
                 btnAnswerThree.visibility = View.VISIBLE
@@ -199,36 +224,42 @@ class QuestionFragment : Fragment(),View.OnClickListener {
 
     override fun onClick(btn: View?) {
         val btnMat = btn as MaterialButton
-        if(!answerStatus){
+        if (!answerStatus) {
             val answerBtn: Button = btn
             val answer = answerBtn.text.toString().htmlEncode()
             if (TextUtils.equals(answer, questionList[currentQuestion - 1].correct_answer)) {
-                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
-                    R.color.beige
-                ))
+                btnMat.strokeColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.beige
+                    )
+                )
                 score += 1
                 drawScore(true)
             } else {
-                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
-                    R.color.claret
-                ))
-                if(questionList[currentQuestion - 1].type != "boolean")
+                btnMat.strokeColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.claret
+                    )
+                )
+                if (questionList[currentQuestion - 1].type != "boolean")
                     showAnswer()
-                lifeLoss +=1
+                lifeLoss += 1
                 drawScore(false)
             }
             answerStatus = true
-        }else{
-            Toast.makeText(context,"Please click next!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Please click next!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun drawScore(answer:Boolean){
+    private fun drawScore(answer: Boolean) {
         if (answer) {
             binding.tvLevelScore.text = "Score: $score"
             if (currentQuestion == 1 && !answerStatus)
                 binding.tvLife.text = "❤ ❤ ❤"
-        }else{
+        } else {
             when (lifeLoss) {
                 1 -> binding.tvLife.text = "❤ ❤"
                 2 -> binding.tvLife.text = "❤"
@@ -240,12 +271,16 @@ class QuestionFragment : Fragment(),View.OnClickListener {
         }
     }
 
-    private fun clearQuestion(){
+    private fun clearQuestion() {
         binding.apply {
-            val strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
-                com.google.android.material.R.color.design_default_color_on_surface)).withAlpha(36)
-            for (i in 0..llAnswers.childCount){
-                if(llAnswers.getChildAt(i) is Button){
+            val strokeColor = ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    requireContext(),
+                    com.google.android.material.R.color.design_default_color_on_surface
+                )
+            ).withAlpha(36)
+            for (i in 0..llAnswers.childCount) {
+                if (llAnswers.getChildAt(i) is Button) {
                     val child = llAnswers.getChildAt(i) as MaterialButton
                     child.strokeColor = strokeColor
                 }
@@ -253,16 +288,23 @@ class QuestionFragment : Fragment(),View.OnClickListener {
         }
     }
 
-    private  fun showAnswer(){
+    private fun showAnswer() {
         binding.apply {
-            for (i in 0 until llAnswers.childCount){
-                    val child = llAnswers.getChildAt(i) as MaterialButton
-                    if(TextUtils.equals(child.text, questionList[currentQuestion - 1].correct_answer.parseAsHtml())){
-                        child.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
+            for (i in 0 until llAnswers.childCount) {
+                val child = llAnswers.getChildAt(i) as MaterialButton
+                if (TextUtils.equals(
+                        child.text,
+                        questionList[currentQuestion - 1].correct_answer.parseAsHtml()
+                    )
+                ) {
+                    child.strokeColor = ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            requireContext(),
                             R.color.beige
-                        ))
-                        break
-                    }
+                        )
+                    )
+                    break
+                }
             }
         }
     }

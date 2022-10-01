@@ -1,6 +1,7 @@
 package com.example.triviaquiz.view.fragment
 
 import android.os.Bundle
+import android.system.Os.remove
 import android.text.TextUtils
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,7 +16,8 @@ import com.example.triviaquiz.databinding.FragmentHomeBinding
 import com.example.triviaquiz.event.QuestionCall
 import com.example.triviaquiz.room.entity.Player
 import com.example.triviaquiz.model.Question
-import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.util.Constant.QUESTION_COUNT
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_EASY
 import com.example.triviaquiz.view.MainActivity
 import com.example.triviaquiz.viewmodel.PlayerViewModel
 import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
@@ -44,11 +46,11 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(inflater,container,false)
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         lifecycle.coroutineScope.launch {
-            playerViewModel.getPlayers().collect(){
-                it.forEach { player->
+            playerViewModel.getPlayers().collect() {
+                it.forEach { player ->
                     var playerChip = createChip(player.username)
                     binding.cgPlayerChips.addView(playerChip)
                 }
@@ -61,67 +63,68 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loaderView = CircularProgressIndicator(requireContext())
-        binding.cgPlayerChips.setOnCheckedStateChangeListener{ group, checkedIds ->
+        binding.cgPlayerChips.setOnCheckedStateChangeListener { group, checkedIds ->
             loaderView.isIndeterminate = true
             binding.llHome.addView(loaderView)
 
-            (activity as MainActivity).initiateQuiz(5,
-                QuestionDifficulty.EASY,object: QuestionCall {
-                override fun onSuccess(questionList: MutableList<Question>) {
-                    questionViewModel.clearQuestions()
-                    questionList.forEach { q ->
-                        questionViewModel.insertQuestion(q)
-                    }
-                    (activity as MainActivity).sfEdit.apply{
-                        remove("username")
-                        putString("username",binding.etName.text.toString())
-                        commit()
-                    }
-                    view.findNavController().navigate(R.id.action_homeFragment_to_questionFragment)
-                }
-
-                override fun onError(error: String) {
-                    binding.llHome.removeView(loaderView)
-                    Toast.makeText(activity,"Failed to fetch questions.", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
-
-        binding.btnSubmit.setOnClickListener { homeView ->
-            if (!TextUtils.isEmpty(binding.etName.text.toString())){
-                loaderView.isIndeterminate = true
-                binding.llHome.addView(loaderView)
-
-                (activity as MainActivity).initiateQuiz(5,
-                    QuestionDifficulty.EASY,object: QuestionCall {
+            (activity as MainActivity).initiateQuiz(QUESTION_COUNT,
+                QUESTION_DIFFICULTY_EASY, object : QuestionCall {
                     override fun onSuccess(questionList: MutableList<Question>) {
-                        val player = Player(binding.etName.text.toString())
-                        playerViewModel.insertPlayer(player)
                         questionViewModel.clearQuestions()
-
                         questionList.forEach { q ->
                             questionViewModel.insertQuestion(q)
                         }
-                        (activity as MainActivity).sfEdit.apply{
-                            remove("username")
-                            putString("username",binding.etName.text.toString())
-                            commit()
-                        }
-                        homeView.findNavController().navigate(R.id.action_homeFragment_to_questionFragment)
+                        (activity as MainActivity).pref.username = binding.etName.text.toString()
+
+                        view.findNavController()
+                            .navigate(R.id.action_homeFragment_to_questionFragment)
                     }
 
                     override fun onError(error: String) {
                         binding.llHome.removeView(loaderView)
-                        Toast.makeText(activity,"Failed to fetch questions.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, "Failed to fetch questions.", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 })
-            }else{
-                Toast.makeText(activity,"Please enter your name.",Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnSubmit.setOnClickListener { homeView ->
+            if (!TextUtils.isEmpty(binding.etName.text.toString())) {
+                loaderView.isIndeterminate = true
+                binding.llHome.addView(loaderView)
+
+                (activity as MainActivity).initiateQuiz(QUESTION_COUNT,
+                    QUESTION_DIFFICULTY_EASY, object : QuestionCall {
+                        override fun onSuccess(questionList: MutableList<Question>) {
+                            val player = Player(binding.etName.text.toString())
+                            playerViewModel.insertPlayer(player)
+                            questionViewModel.clearQuestions()
+
+                            questionList.forEach { q ->
+                                questionViewModel.insertQuestion(q)
+                            }
+                            (activity as MainActivity).pref.username = binding.etName.text.toString()
+
+                            homeView.findNavController()
+                                .navigate(R.id.action_homeFragment_to_questionFragment)
+                        }
+
+                        override fun onError(error: String) {
+                            binding.llHome.removeView(loaderView)
+                            Toast.makeText(
+                                activity,
+                                "Failed to fetch questions.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+            } else {
+                Toast.makeText(activity, "Please enter your name.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun createChip(label:String): Chip {
+    private fun createChip(label: String): Chip {
         return Chip(context).apply {
             id = View.generateViewId()
             text = label

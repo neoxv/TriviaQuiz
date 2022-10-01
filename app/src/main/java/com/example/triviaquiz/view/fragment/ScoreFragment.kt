@@ -14,7 +14,8 @@ import com.example.triviaquiz.*
 import com.example.triviaquiz.databinding.FragmentScoreBinding
 import com.example.triviaquiz.event.QuestionCall
 import com.example.triviaquiz.model.Question
-import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.util.Constant.QUESTION_COUNT
+import com.example.triviaquiz.util.Constant.QUESTION_DIFFICULTY_EASY
 import com.example.triviaquiz.view.MainActivity
 import com.example.triviaquiz.viewmodel.PlayerViewModel
 import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
@@ -60,7 +61,7 @@ class ScoreFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loaderView = CircularProgressIndicator(requireContext())
         score = requireArguments().getInt("score")
-        username = (activity as MainActivity).sf.getString("username","").toString()
+        username = (activity as MainActivity).pref.username
         level = requireArguments().getInt("level")
         if(requireArguments().getBoolean("highScore")){
             binding.apply {
@@ -83,8 +84,8 @@ class ScoreFragment : Fragment() {
             }
         }
         binding.btnTryAgain.setOnClickListener{
-            (activity as MainActivity).initiateQuiz(5,
-                QuestionDifficulty.EASY,object: QuestionCall {
+            (activity as MainActivity).initiateQuiz(QUESTION_COUNT,
+                QUESTION_DIFFICULTY_EASY,object: QuestionCall {
                 override fun onSuccess(questionList: MutableList<Question>) {
 
                     questionViewModel.clearQuestions()
