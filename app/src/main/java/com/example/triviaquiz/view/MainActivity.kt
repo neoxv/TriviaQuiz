@@ -1,16 +1,19 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.view
 
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.example.triviaquiz.databinding.ActivityMainBinding
-import com.example.triviaquiz.db.Player
-import com.example.triviaquiz.db.Question
-import com.example.triviaquiz.db.Questions
-import com.example.triviaquiz.db.TriviaQuizDatabase
+import com.example.triviaquiz.event.QuestionCall
+import com.example.triviaquiz.model.Question
+import com.example.triviaquiz.model.Questions
+import com.example.triviaquiz.service.QuestionService
+import com.example.triviaquiz.service.RetrofitInstance
+import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.viewmodel.PlayerViewModel
+import com.example.triviaquiz.viewmodel.QuestionViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,8 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     lateinit var sf:SharedPreferences
     lateinit var sfEdit:SharedPreferences.Editor
-    val questionViewModel:QuestionViewModel  by viewModels()
-    val playerViewModel:PlayerViewModel  by viewModels()
+    val questionViewModel: QuestionViewModel by viewModels()
+    val playerViewModel: PlayerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +35,9 @@ class MainActivity : AppCompatActivity() {
         sfEdit = sf.edit()
     }
 
-    fun initiateQuiz(count:Int, difficulty: QuestionDifficulty, callback:QuestionCall) {
-        val questionService:QuestionService = RetrofitInstance.getRetrofitInstance().create(QuestionService::class.java)
+    fun initiateQuiz(count:Int, difficulty: QuestionDifficulty, callback: QuestionCall) {
+        val questionService: QuestionService = RetrofitInstance.getRetrofitInstance()
+            .create(QuestionService::class.java)
         questionService.getQuestions(count,difficulty.difficulty).enqueue(object: Callback<Questions> {
             override fun onResponse(call: Call<Questions>, response: Response<Questions>) {
                 if (response.body() != null && response?.code() == 200) {

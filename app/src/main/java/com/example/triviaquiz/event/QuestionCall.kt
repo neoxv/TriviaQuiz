@@ -1,6 +1,6 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.event
 
-import com.example.triviaquiz.db.Question
+import com.example.triviaquiz.model.Question
 
 
 interface QuestionCall {

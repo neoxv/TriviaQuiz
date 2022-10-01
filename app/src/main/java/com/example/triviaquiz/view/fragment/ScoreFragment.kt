@@ -1,26 +1,28 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.view.fragment
 
 import android.os.Bundle
-import android.os.Parcelable
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
+import com.example.triviaquiz.*
 import com.example.triviaquiz.databinding.FragmentScoreBinding
-import com.example.triviaquiz.db.Player
-import com.example.triviaquiz.db.Question
+import com.example.triviaquiz.event.QuestionCall
+import com.example.triviaquiz.model.Question
+import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.view.MainActivity
+import com.example.triviaquiz.viewmodel.PlayerViewModel
+import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
+import com.example.triviaquiz.viewmodel.QuestionViewModel
+import com.example.triviaquiz.viewmodel.QuestionViewModelFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.util.ArrayList
 
 
 class ScoreFragment : Fragment() {
@@ -81,7 +83,8 @@ class ScoreFragment : Fragment() {
             }
         }
         binding.btnTryAgain.setOnClickListener{
-            (activity as MainActivity).initiateQuiz(5,QuestionDifficulty.EASY,object: QuestionCall {
+            (activity as MainActivity).initiateQuiz(5,
+                QuestionDifficulty.EASY,object: QuestionCall {
                 override fun onSuccess(questionList: MutableList<Question>) {
 
                     questionViewModel.clearQuestions()

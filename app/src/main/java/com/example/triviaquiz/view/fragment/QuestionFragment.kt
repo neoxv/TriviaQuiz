@@ -1,8 +1,7 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.view.fragment
 
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.os.Parcelable
 import android.text.TextUtils
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -16,20 +15,20 @@ import androidx.core.os.bundleOf
 import androidx.core.text.htmlEncode
 import androidx.core.text.parseAsHtml
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
+import com.example.triviaquiz.*
 import com.example.triviaquiz.databinding.FragmentQuestionBinding
-import com.example.triviaquiz.db.Player
-import com.example.triviaquiz.db.Question
+import com.example.triviaquiz.event.QuestionCall
+import com.example.triviaquiz.model.Question
+import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.view.MainActivity
+import com.example.triviaquiz.viewmodel.PlayerViewModel
+import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
+import com.example.triviaquiz.viewmodel.QuestionViewModel
+import com.example.triviaquiz.viewmodel.QuestionViewModelFactory
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 class QuestionFragment : Fragment(),View.OnClickListener {
@@ -85,7 +84,7 @@ class QuestionFragment : Fragment(),View.OnClickListener {
                 if (!gameStatus){
                     var highScore = false
                     lifecycle.coroutineScope.launch {
-                        playerViewModel.getPlayerByName((activity as MainActivity).sf.getString("username","").toString()).collect(){player ->
+                        playerViewModel.getPlayerByName((activity as MainActivity).sf.getString("username","").toString()).collect(){ player ->
                             if(player != null){
                             Log.i("t","player is not null")
                                 if (player.highLevel < level){
@@ -128,7 +127,8 @@ class QuestionFragment : Fragment(),View.OnClickListener {
                             QuestionDifficulty.EASY
                         }
                     }
-                    (activity as MainActivity).initiateQuiz(5, currentDifficulty,object: QuestionCall {
+                    (activity as MainActivity).initiateQuiz(5, currentDifficulty,object:
+                        QuestionCall {
                         override fun onSuccess(newQuestionList: MutableList<Question>) {
                             questionViewModel.clearQuestions()
                             questionList = newQuestionList
@@ -203,11 +203,15 @@ class QuestionFragment : Fragment(),View.OnClickListener {
             val answerBtn: Button = btn
             val answer = answerBtn.text.toString().htmlEncode()
             if (TextUtils.equals(answer, questionList[currentQuestion - 1].correct_answer)) {
-                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),R.color.beige))
+                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
+                    R.color.beige
+                ))
                 score += 1
                 drawScore(true)
             } else {
-                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),R.color.claret))
+                btnMat.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
+                    R.color.claret
+                ))
                 if(questionList[currentQuestion - 1].type != "boolean")
                     showAnswer()
                 lifeLoss +=1
@@ -254,7 +258,9 @@ class QuestionFragment : Fragment(),View.OnClickListener {
             for (i in 0 until llAnswers.childCount){
                     val child = llAnswers.getChildAt(i) as MaterialButton
                     if(TextUtils.equals(child.text, questionList[currentQuestion - 1].correct_answer.parseAsHtml())){
-                        child.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),R.color.beige))
+                        child.strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
+                            R.color.beige
+                        ))
                         break
                     }
             }

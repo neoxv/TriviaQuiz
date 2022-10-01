@@ -1,4 +1,4 @@
-package com.example.triviaquiz.db
+package com.example.triviaquiz.room.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

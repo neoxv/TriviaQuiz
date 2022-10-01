@@ -1,4 +1,4 @@
-package com.example.triviaquiz.db
+package com.example.triviaquiz.room
 
 import androidx.room.TypeConverter
 

@@ -1,4 +1,4 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.util
 
 enum class QuestionDifficulty(val difficulty: String) {
     EASY("easy"),

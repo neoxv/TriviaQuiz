@@ -1,4 +1,4 @@
-package com.example.triviaquiz
+package com.example.triviaquiz.view.fragment
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -9,17 +9,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.example.triviaquiz.*
 import com.example.triviaquiz.databinding.FragmentHomeBinding
-import com.example.triviaquiz.db.Player
-import com.example.triviaquiz.db.Question
+import com.example.triviaquiz.event.QuestionCall
+import com.example.triviaquiz.room.entity.Player
+import com.example.triviaquiz.model.Question
+import com.example.triviaquiz.util.QuestionDifficulty
+import com.example.triviaquiz.view.MainActivity
+import com.example.triviaquiz.viewmodel.PlayerViewModel
+import com.example.triviaquiz.viewmodel.PlayerViewModelFactory
+import com.example.triviaquiz.viewmodel.QuestionViewModel
+import com.example.triviaquiz.viewmodel.QuestionViewModelFactory
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import retrofit2.Callback
 
 
 class HomeFragment : Fragment() {
@@ -61,7 +65,8 @@ class HomeFragment : Fragment() {
             loaderView.isIndeterminate = true
             binding.llHome.addView(loaderView)
 
-            (activity as MainActivity).initiateQuiz(5,QuestionDifficulty.EASY,object: QuestionCall {
+            (activity as MainActivity).initiateQuiz(5,
+                QuestionDifficulty.EASY,object: QuestionCall {
                 override fun onSuccess(questionList: MutableList<Question>) {
                     questionViewModel.clearQuestions()
                     questionList.forEach { q ->
@@ -87,7 +92,8 @@ class HomeFragment : Fragment() {
                 loaderView.isIndeterminate = true
                 binding.llHome.addView(loaderView)
 
-                (activity as MainActivity).initiateQuiz(5,QuestionDifficulty.EASY,object: QuestionCall {
+                (activity as MainActivity).initiateQuiz(5,
+                    QuestionDifficulty.EASY,object: QuestionCall {
                     override fun onSuccess(questionList: MutableList<Question>) {
                         val player = Player(binding.etName.text.toString())
                         playerViewModel.insertPlayer(player)
